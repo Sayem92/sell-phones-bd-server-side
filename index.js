@@ -23,6 +23,7 @@ async function run() {
     try {
 
         const categoriesCollection = client.db("SellPhones").collection("categories");
+        const productsCollection = client.db("SellPhones").collection("products");
 
         //load categories all-------
         app.get('/categories', async (req, res) => {
@@ -30,6 +31,19 @@ async function run() {
             const categories = await categoriesCollection.find(query).toArray();
             res.send(categories);
         });
+
+        //load categories products -------
+        app.get('/categories/:id', async (req, res) => {
+            const id = parseFloat(req.params.id);
+            const query = {}
+            const allProducts = await productsCollection.find(query).toArray();
+            const products = allProducts.filter(pro => pro.proId === id)
+            res.send(products);
+        });
+
+
+
+
 
 
 
