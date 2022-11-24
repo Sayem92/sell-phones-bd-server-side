@@ -24,10 +24,17 @@ async function run() {
 
         const categoriesCollection = client.db("SellPhones").collection("categories");
 
-      
+        //load categories all-------
+        app.get('/categories', async (req, res) => {
+            const query = {}
+            const categories = await categoriesCollection.find(query).toArray();
+            res.send(categories);
+        });
 
 
-         
+
+
+
 
 
     }
