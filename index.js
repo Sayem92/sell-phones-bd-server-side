@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 
@@ -45,8 +45,8 @@ async function run() {
             res.send({ isSeller: user?.sellerAccount === true });
         });
 
-         // get admin user-----
-         app.get('/users/admin/:email', async (req, res) => {
+        // get admin user-----
+        app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email };
             const user = await usersCollection.findOne(query);
@@ -85,13 +85,19 @@ async function run() {
 
         // admin && seller get my product data save---------
         app.get('/myProduct', async (req, res) => {
-            const query = { }
+            const query = {}
             const result = await addProductCollection.find(query).toArray();
             res.send(result);
         });
 
+        // admin && seller delete product ---------
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await addProductCollection.deleteOne(query);
+            res.send(result);
+        });
 
-       
 
 
 
