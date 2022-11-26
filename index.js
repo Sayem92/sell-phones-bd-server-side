@@ -26,6 +26,7 @@ async function run() {
         const categoriesCollection = client.db("SellPhones").collection("categories");
         const productsCollection = client.db("SellPhones").collection("products");
         const bookedProductCollection = client.db("SellPhones").collection("BookedProduct");
+        const sellerAddProductCollection = client.db("SellPhones").collection("sellerAddProduct");
 
         //save user data ---------
         app.post('/users', async (req, res) => {
@@ -72,7 +73,14 @@ async function run() {
             const bookedData = req.body;
             const result = await bookedProductCollection.insertOne(bookedData);
             res.send(result);
-        })
+        });
+
+        // seller add a product data save---
+        app.post('/seller/addProduct', async (req, res) => {
+            const addProduct = req.body;
+            const result = await sellerAddProductCollection.insertOne(addProduct);
+            res.send(result);
+        });
 
 
 
