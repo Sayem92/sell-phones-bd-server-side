@@ -26,7 +26,8 @@ async function run() {
         const categoriesCollection = client.db("SellPhones").collection("categories");
         const productsCollection = client.db("SellPhones").collection("products");
         const bookedProductCollection = client.db("SellPhones").collection("BookedProduct");
-        const sellerAddProductCollection = client.db("SellPhones").collection("sellerAddProduct");
+
+        const addProductCollection = client.db("SellPhones").collection("AddProduct");
 
         //save user data ---------
         app.post('/users', async (req, res) => {
@@ -38,7 +39,7 @@ async function run() {
         // get user for seller--------
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email
-            console.log(email);
+            // console.log(email);
             const query = { email };
             const user = await usersCollection.findOne(query)
             res.send({ isSeller: user?.sellerAccount === true });
@@ -75,13 +76,22 @@ async function run() {
             res.send(result);
         });
 
-        // seller add a product data save---
-        app.post('/seller/addProduct', async (req, res) => {
+        // admin && seller add a product data save---
+        app.post('/addProduct', async (req, res) => {
             const addProduct = req.body;
-            const result = await sellerAddProductCollection.insertOne(addProduct);
+            const result = await addProductCollection.insertOne(addProduct);
             res.send(result);
         });
 
+        // admin && seller get my product data save---------
+        app.get('/myProduct', async (req, res) => {
+            const query = { }
+            const result = await addProductCollection.find(query).toArray();
+            res.send(result);
+        });
+
+
+       
 
 
 
