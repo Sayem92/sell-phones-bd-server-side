@@ -76,6 +76,14 @@ async function run() {
             res.send(result);
         });
 
+        // get my orders----------
+        app.get('/bookedProduct', async (req, res) => {
+            const query = {}
+            const result = await bookedProductCollection.find(query).toArray();
+            res.send(result);
+        });
+
+
         // admin && seller add a product data save---
         app.post('/addProduct', async (req, res) => {
             const addProduct = req.body;
