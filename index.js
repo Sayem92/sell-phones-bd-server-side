@@ -136,6 +136,16 @@ async function run() {
             res.send(result)
         })
 
+
+        //admin show all sellers info
+        app.get('/allSellers', async (req, res) => {
+            const query = {}
+            const users = await usersCollection.find(query).toArray();
+            const sellers = users.filter(buyer => buyer.sellerAccount === true)
+            const result = sellers.filter(admin => admin.role !== 'admin');
+            res.send(result)
+        });
+
         // admin delete any buyer or sellers-----------
         app.delete('/users/delete/:id', async (req, res) => {
             const id = req.params.id;
@@ -146,8 +156,7 @@ async function run() {
 
 
 
-      
-
+        
 
 
 
