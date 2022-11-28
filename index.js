@@ -27,6 +27,8 @@ async function run() {
         const productsCollection = client.db("SellPhones").collection("products");
         const bookedProductCollection = client.db("SellPhones").collection("BookedProduct");
 
+        const reviewsCollection = client.db("SellPhones").collection("reviews");
+
 
         //save user data ---------
         app.post('/users', async (req, res) => {
@@ -155,8 +157,15 @@ async function run() {
         });
 
 
+        // get all reviews-----------------
+        app.get('/reviews', async (req, res) => {
+            const query = {}
+            const reviews = await reviewsCollection.find(query).toArray();
+            res.send(reviews);
+        });
 
-        
+
+
 
 
 
