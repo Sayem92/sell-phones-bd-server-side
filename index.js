@@ -127,10 +127,18 @@ async function run() {
         //-----------------------------------------------------------
 
 
+        //admin show all buyers info
+        app.get('/allBuyers', async (req, res) => {
+            const query = {}
+            const users = await usersCollection.find(query).toArray();
+            const buyers = users.filter(buyer => buyer.sellerAccount === false)
+            const result = buyers.filter(admin => admin.role !== 'admin');
+            res.send(result)
+        })
 
 
 
-
+        
 
 
 
