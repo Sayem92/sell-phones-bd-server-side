@@ -27,7 +27,6 @@ async function run() {
         const productsCollection = client.db("SellPhones").collection("products");
         const bookedProductCollection = client.db("SellPhones").collection("BookedProduct");
 
-        const addProductCollection = client.db("SellPhones").collection("AddProduct");
 
         //save user data ---------
         app.post('/users', async (req, res) => {
@@ -61,13 +60,50 @@ async function run() {
         });
 
         //load categories products -------
-        app.get('/categories/:id', async (req, res) => {
-            const id = parseFloat(req.params.id);
+        app.get('/products/:cateName', async (req, res) => {
+            const name = req.params.cateName;
             const query = {}
             const allProducts = await productsCollection.find(query).toArray();
-            const products = allProducts.filter(pro => pro.proId === id)
+            const products = allProducts.filter(pro => pro.categoryName === name)
             res.send(products);
         });
+
+
+        // -------------------------------------
+        //              seller only 
+        //--------------------------------------
+
+        // seller add a product data save---
+        app.post('/addProduct', async (req, res) => {
+            const addProduct = req.body;
+            const result = await productsCollection.insertOne(addProduct);
+            res.send(result);
+        });
+
+        // seller get my product data save---------
+        app.get('/myProduct/:email', async (req, res) => {
+            const email = req.params.email;
+
+            const query = { sellerEmail: email }
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        // seller delete product ---------
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        //-----------------------------------------------------------
+
+
+
+        // -------------------------------------
+        //              buyers only 
+        //--------------------------------------
 
         // booked product data save---
         app.post('/bookedProduct', async (req, res) => {
@@ -76,35 +112,26 @@ async function run() {
             res.send(result);
         });
 
-        // get my orders----------
-        app.get('/bookedProduct', async (req, res) => {
-            const query = {}
+        // get my orders only buyers----------
+        app.get('/bookedProduct/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email }
             const result = await bookedProductCollection.find(query).toArray();
             res.send(result);
         });
 
 
-        // admin && seller add a product data save---
-        app.post('/addProduct', async (req, res) => {
-            const addProduct = req.body;
-            const result = await addProductCollection.insertOne(addProduct);
-            res.send(result);
-        });
+        // payment baki---------
 
-        // admin && seller get my product data save---------
-        app.get('/myProduct', async (req, res) => {
-            const query = {}
-            const result = await addProductCollection.find(query).toArray();
-            res.send(result);
-        });
+        //-----------------------------------------------------------
 
-        // admin && seller delete product ---------
-        app.delete('/product/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) }
-            const result = await addProductCollection.deleteOne(query);
-            res.send(result);
-        });
+
+
+
+
+
+
 
 
 
