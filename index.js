@@ -33,7 +33,7 @@ function verifyJWT(req, res, next) {
         if (err) {
             return res.status(403).send({ message: 'forbidden access' });
         }
-        req.decoded = decoded; 
+        req.decoded = decoded;
         next();
     })
 };
@@ -60,14 +60,14 @@ async function run() {
             const filter = { email: email }
             const options = { upsert: true }
             const updateDoc = {
-              $set: user,
+                $set: user,
             }
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         });
 
-          //create jwt---------
-          app.get('/jwt', async (req, res) => {
+        //create jwt---------
+        app.get('/jwt', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
             const user = await usersCollection.findOne(query);
@@ -139,10 +139,10 @@ async function run() {
             const id = req.params.id;
 
             // advertise----------------
-            const filter = {proId : id}
+            const filter = { proId: id }
             const advertise = await advertiseCollection.deleteOne(filter);
 
-           // products taki-------------
+            // products taki-------------
             const query = { _id: ObjectId(id) }
             const result = await productsCollection.deleteOne(query);
             res.send(result);
@@ -166,7 +166,7 @@ async function run() {
         // get my orders only buyers----------
         app.get('/bookedProduct/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            console.log(email);
+            // console.log(email);
             const query = { email }
             const result = await bookedProductCollection.find(query).toArray();
             res.send(result);
@@ -237,7 +237,7 @@ async function run() {
 
 
         //admin show all buyers info
-        app.get('/allBuyers', async (req, res) => {
+        app.get('/allBuyers', verifyJWT, async (req, res) => {
             const query = {}
             const users = await usersCollection.find(query).toArray();
             const buyers = users.filter(buyer => buyer.sellerAccount === false)
@@ -247,7 +247,7 @@ async function run() {
 
 
         //admin show all sellers info
-        app.get('/allSellers', async (req, res) => {
+        app.get('/allSellers', verifyJWT, async (req, res) => {
             const query = {}
             const users = await usersCollection.find(query).toArray();
             const sellers = users.filter(buyer => buyer.sellerAccount === true)
