@@ -6,7 +6,7 @@ require('dotenv').config();
 //  Stripe ar-------
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -19,6 +19,24 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.lhckmem.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden access' });
+        }
+        req.decoded = decoded; 
+        next();
+    })
+};
 
 
 async function run() {
@@ -48,6 +66,19 @@ async function run() {
             res.send(result);
         });
 
+          //create jwt---------
+          app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '10d' });
+                return res.send({ accessToken: token })
+            }
+
+            res.status(403).send({ accessToken: 'no token available' })
+
+        });
 
         // get user for seller--------
         app.get('/users/:email', async (req, res) => {
@@ -133,7 +164,7 @@ async function run() {
         });
 
         // get my orders only buyers----------
-        app.get('/bookedProduct/:email', async (req, res) => {
+        app.get('/bookedProduct/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             console.log(email);
             const query = { email }
