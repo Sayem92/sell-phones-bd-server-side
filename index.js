@@ -36,11 +36,18 @@ async function run() {
 
 
         //save user data ---------
-        app.post('/users', async (req, res) => {
-            const users = req.body;
-            const result = await usersCollection.insertOne(users);
+        app.put('/users', async (req, res) => {
+            const user = req.body
+            const email = user.email
+            const filter = { email: email }
+            const options = { upsert: true }
+            const updateDoc = {
+              $set: user,
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         });
+
 
         // get user for seller--------
         app.get('/users/:email', async (req, res) => {
@@ -103,7 +110,7 @@ async function run() {
             // advertise----------------
             const filter = {proId : id}
             const advertise = await advertiseCollection.deleteOne(filter);
-            
+
            // products taki-------------
             const query = { _id: ObjectId(id) }
             const result = await productsCollection.deleteOne(query);
