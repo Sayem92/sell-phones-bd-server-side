@@ -3,6 +3,8 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
+//  Stripe ar-------
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const jwt = require('jsonwebtoken')
 
@@ -28,6 +30,8 @@ async function run() {
         const bookedProductCollection = client.db("SellPhones").collection("BookedProduct");
 
         const reviewsCollection = client.db("SellPhones").collection("reviews");
+
+        const paymentsCollection = client.db("SellPhones").collection("payments");
 
 
         //save user data ---------
@@ -124,8 +128,66 @@ async function run() {
         });
 
 
-        // payment baki---------
+        // get single booking data----------
+        app.get("/bookingData/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const singleBooking = await bookedProductCollection.findOne(query);
+            res.send(singleBooking)
+        });
 
+
+
+        app.post('/create-payment-intent', async (req, res) => {
+            const booking = req.body;
+            const price = booking.productPrice;
+            const amount = price * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                "payment_method_types": [
+                    "card"
+                ],
+            })
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+
+        });
+
+
+        // save user payment data ---------
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+
+            // product a set-----------
+            const id = payment.productId;
+            const filter = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    sold: true,
+                    transactionId: payment.transactionId,
+                }
+            }
+            const updatedResult = await productsCollection.updateOne(filter, updatedDoc)
+
+            //booking products a set-----------
+            const bookId = payment.payId;
+            const filter2 = { _id: ObjectId(bookId) }
+            const updatedDoc2 = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,
+                }
+            }
+            const updatedResult2 = await bookedProductCollection.updateOne(filter2, updatedDoc2)
+
+
+            res.send(result)
+        });
         //-----------------------------------------------------------
 
 
@@ -151,7 +213,7 @@ async function run() {
         // admin delete any buyer or sellers-----------
         app.delete('/users/delete/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const result = await usersCollection.deleteOne(query);
             res.send(result);
         });
@@ -163,6 +225,8 @@ async function run() {
             const reviews = await reviewsCollection.find(query).toArray();
             res.send(reviews);
         });
+
+
 
 
 
