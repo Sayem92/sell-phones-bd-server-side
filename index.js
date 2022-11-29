@@ -32,6 +32,7 @@ async function run() {
         const reviewsCollection = client.db("SellPhones").collection("reviews");
 
         const paymentsCollection = client.db("SellPhones").collection("payments");
+        const advertiseCollection = client.db("SellPhones").collection("advertise");
 
 
         //save user data ---------
@@ -225,6 +226,30 @@ async function run() {
             const reviews = await reviewsCollection.find(query).toArray();
             res.send(reviews);
         });
+
+
+
+        // sellers advertise ------------------------------
+        app.put('/advertise/:id', async (req, res) => {
+            const id = req.params.id;
+            const product = req.body;
+            const filter = { proId: id }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: product,
+            }
+            const result = await advertiseCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
+
+        // get seller advertise products---------------
+        app.get('/advertise', async (req, res) => {
+            const query = {}
+            const result = await advertiseCollection.find(query).toArray();
+            res.send(result)
+        })
+
+
 
 
 
