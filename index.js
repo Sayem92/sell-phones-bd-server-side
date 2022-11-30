@@ -231,6 +231,13 @@ async function run() {
             const updatedResult2 = await bookedProductCollection.updateOne(filter2, updatedDoc2)
 
 
+            // delete advertise taki-----------
+            const idAdvertise = payment.productId;
+            const query = { proId: idAdvertise };
+            const deleteAdvertise = await advertiseCollection.deleteOne(query);
+
+
+
             res.send(result)
         });
         //-----------------------------------------------------------
