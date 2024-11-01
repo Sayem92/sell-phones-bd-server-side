@@ -19,6 +19,7 @@ const port = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:3000",
   "https://yourfrontenddomain.com",
+  'https://sell-phones-bd.web.app'
 ];
 app.use(
   cors({
